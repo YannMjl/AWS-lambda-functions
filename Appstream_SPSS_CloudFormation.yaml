@@ -1,0 +1,157 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This CloudFormation Stack creates an always on fleet of spss machines for use in class.
+Resources:
+  AppStreamFleet:
+    Type: 'AWS::AppStream::Fleet'
+    Properties:
+      Name: SPSS-AO
+      Description: SPSS Always On Fleet for use during lectures
+      DisplayName: SPSS Always On
+      ImageName: SPSS
+      InstanceType: stream.standard.medium
+      FleetType: ALWAYS_ON
+      ComputeCapacity:
+        DesiredInstances: 26
+      VpcConfig:
+        SubnetIds:
+          - subnet-08cbc18e38a2bb2c3
+          - subnet-0008bea6639481f82
+      MaxUserDurationInSeconds: '21600'
+      DisconnectTimeoutInSeconds: '900'
+      EnableDefaultInternetAccess: true
+      Tags:
+      - Key: 'info:TaggingVersion'
+        Value: 2.0.0
+      - Key: 'its:Provisioner'
+        Value: CloudFormation
+      - Key: 'its:DataClassification'
+        Value: Green
+      - Key: 'its:ServiceOwner'
+        Value: lmthomas1@stthomas.edu
+      - Key: 'its:SecurityReviewDate'
+        Value: NEEDSTOBECONDUCTED
+      - Key: 'its:SecurityReviewTicket'
+        Value: NEEDSTOBECONDUCTED
+      - Key: CA001
+        Value: '74166'
+      - Key: CostCenter
+        Value: OCB-Marketing
+      - Key: Creator
+        Value: lmthomas1@stthomas.edu
+      - Key: Department
+        Value: OCB-Marketing
+      - Key: Environment
+        Value: Academic Operations
+      - Key: Name
+        Value: SPSS-AO
+      - Key: Owner
+        Value: david.harman@stthomas.edu
+      - Key: Project
+        Value: CloudMigration
+      - Key: Purpose
+        Value: Always On Fleet for in class use of SPSS
+      - Key: Service
+        Value: Application Virtualization
+      - Key: Status
+        Value: In Production
+      - Key: Use
+        Value: Faculty/Student
+    CreationPolicy:
+      StartFleet: true
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 31faacc5-fdff-4c3d-8799-d57ad8e7b356
+  AppStreamStack:
+    Type: 'AWS::AppStream::Stack'
+    Properties:
+      Name: SPSS-AO
+      Description: SPSS Stack for Always On Fleet for use in Lectures
+      StorageConnectors:
+        - ConnectorType: ONE_DRIVE
+          Domains:
+            - stthomas.edu
+      Tags:
+        - Key: 'info:TaggingVersion'
+          Value: 2.0.0
+        - Key: 'its:Provisioner'
+          Value: CloudFormation
+        - Key: 'its:DataClassification'
+          Value: Green
+        - Key: 'its:ServiceOwner'
+          Value: lmthomas1@stthomas.edu
+        - Key: 'its:SecurityReviewDate'
+          Value: NEEDSTOBECONDUCTED
+        - Key: 'its:SecurityReviewTicket'
+          Value: NEEDSTOBECONDUCTED
+        - Key: CA001
+          Value: '74166'
+        - Key: CostCenter
+          Value: OCB-Marketing
+        - Key: Creator
+          Value: lmthomas1@stthomas.edu
+        - Key: Department
+          Value: OCB-Marketing
+        - Key: Environment
+          Value: Academic Operations
+        - Key: Name
+          Value: SPSS-AO
+        - Key: Owner
+          Value: david.harman@stthomas.edu
+        - Key: Project
+          Value: CloudMigration
+        - Key: Purpose
+          Value: Always On Fleet for in class use of SPSS
+        - Key: Service
+          Value: Application Virtualization
+        - Key: Status
+          Value: In Production
+        - Key: Use
+          Value: Faculty/Student
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 0eddf6ca-9e79-4122-b9ee-087f81df182f
+  AppStreamDemoStackFleetAssociation:
+    Type: 'AWS::AppStream::StackFleetAssociation'
+    Properties:
+      FleetName: SPSS-AO
+      StackName: SPSS-AO
+    DependsOn:
+      - AppStreamFleet
+      - AppStreamStack
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 12f3d200-465a-4093-a468-fed9ddefd690
+Metadata:
+
+
+  'AWS::CloudFormation::Designer':
+    0eddf6ca-9e79-4122-b9ee-087f81df182f:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 180
+        'y': 90
+      z: 1
+      embeds: []
+    31faacc5-fdff-4c3d-8799-d57ad8e7b356:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 420
+        'y': 90
+      z: 1
+      embeds: []
+    12f3d200-465a-4093-a468-fed9ddefd690:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 300
+        'y': 90
+      z: 1
+      embeds: []
+      dependson:
+        - 31faacc5-fdff-4c3d-8799-d57ad8e7b356
+        - 0eddf6ca-9e79-4122-b9ee-087f81df182f
