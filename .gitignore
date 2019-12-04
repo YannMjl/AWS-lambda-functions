@@ -1,0 +1,106 @@
+# ***************************************************************#
+# recommended git ignore rules for Windows operating system
+#****************************************************************#
+
+./manage.office.com.cfg
+
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+#****************************************************************#
+
+# compiled output
+/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
+
+#****************************************************************#
+# IDEs and editors                                               #
+#****************************************************************#
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# Compiled source 
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Packages 
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated System Files
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+*.lock
+#****************************************************************#
