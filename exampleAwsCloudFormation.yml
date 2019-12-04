@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "This CloudFormation Stack creates AppStream resources within the default VPC."
+
+Resources:
+  AppStreamFleet:
+    Type: "AWS::AppStream::Fleet"
+    Properties:
+      Name: "DemoFleet"
+      Description: "This is a demo fleet that was created using CloudFormation"
+      DisplayName: "A demo fleet created in CloudFormation"
+      ImageName: "MySampleImage"
+      InstanceType: "stream.standard.medium"
+      FleetType: "ALWAYS_ON"
+      ComputeCapacity:
+        DesiredInstances: 5
+      VpcConfig:
+        SubnetIds:
+          - subnet-<redacted>
+          - subnet-<redacted>          
+        SecurityGroupIds:
+          - sg-<redacted>          
+      MaxUserDurationInSeconds: "57600"
+      DisconnectTimeoutInSeconds: "900"
+      EnableDefaultInternetAccess: False
+    CreationPolicy:
+      StartFleet: True
+
+  ScaleTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    Properties:
+      MinCapacity: 1
+      MaxCapacity: 5
+      ResourceId:  !Join
+        - ''
+        - - 'fleet/'
+          - !Ref AppStreamFleet
+      RoleARN: >-
+        arn:aws:iam::<aws-account-number>:role/service-role/ApplicationAutoScalingForAmazonAppStreamAccess
+      ScalableDimension: 'appstream:fleet:DesiredCapacity'
+      ServiceNamespace: appstream
+    DependsOn:
+      - AppStreamFleet
+
+  ScaleInPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: !Join
+        - ''
+        - - 'ScaleIn-'
+          - !Ref AppStreamFleet
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ScaleTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 360
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0.0
+            ScalingAdjustment: -1
+    DependsOn:
+      - ScaleTarget
+
+  ScaleOutPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName:  !Join
+        - ''
+        - - 'ScaleOut-'
+          - !Ref AppStreamFleet
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ScaleTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: ChangeInCapacity
+        Cooldown: 120
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0.0
+            ScalingAdjustment: 2
+    DependsOn:
+      - ScaleTarget
+
+  ScaleInAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties : 
+      AlarmActions : 
+        - !Ref ScaleInPolicy
+      AlarmDescription : "Scale in the fleet when using 25% capacity"
+      AlarmName :  !Join
+        - ''
+        - - 'ScaleInAlarm'
+          - !Ref AppStreamFleet
+      Dimensions : 
+        - Name: Fleet
+          Value: !Ref AppStreamFleet
+      MetricName : CapacityUtilization
+      Namespace : AWS/AppStream
+      Period : 120
+      EvaluationPeriods : 10      
+      Statistic : Average
+      Threshold : 25
+      ComparisonOperator : LessThanOrEqualToThreshold      
+      Unit : Percent
+    DependsOn:
+      - ScaleInPolicy   
+
+  ScaleOutAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties : 
+      AlarmActions : 
+        - !Ref ScaleOutPolicy
+      AlarmDescription : "Scale out the fleet when using 75% capacity"
+      AlarmName :  !Join
+        - ''
+        - - 'ScaleOutAlarm'
+          - !Ref AppStreamFleet
+      Dimensions : 
+        - Name: Fleet
+          Value: !Ref AppStreamFleet
+      MetricName : CapacityUtilization
+      Namespace : AWS/AppStream
+      Period : 60
+      EvaluationPeriods : 3      
+      Statistic : Average
+      Threshold : 75
+      ComparisonOperator : GreaterThanOrEqualToThreshold      
+      Unit : Percent
+    DependsOn:
+      - ScaleOutPolicy
+      
+  AppStreamStack:
+    Type: "AWS::AppStream::Stack"
+    Properties:
+      Name: "DemoStack"
+      Description: "This demo stack was created using CloudFormation"
+      StorageConnectors:
+        - ConnectorType: "HOMEFOLDERS"
+          ResourceIdentifier: "TestCloudFormationStackBucket"
+          
+  AppStreamDemoStackFleetAssociation:
+    Type: 'AWS::AppStream::StackFleetAssociation'
+    Properties:
+      FleetName: !Ref AppStreamFleet
+      StackName: !Ref AppStreamStack
+    DependsOn:
+      - AppStreamFleet
+      - AppStreamStack
+      
+  AppStreamUser:
+    Type: "AWS::AppStream::User"
+    Properties:
+      UserName: "user@email.com"
+      FirstName: "John"
+      LastName: "Smith"
+      AuthenticationType: "USERPOOL"
+      
+  AppStreamStackUserAssociation:
+    Type: "AWS::AppStream::StackUserAssociation"
+    Properties:
+      UserName: "user@email.com"
+      StackName: !Ref AppStreamStack
+      SendEmailNotification: False
+    DependsOn:
+     - AppStreamStack
+     - AppStreamUser
